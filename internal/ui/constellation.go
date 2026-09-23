@@ -294,7 +294,7 @@ func (c *constellation) view(w, h int) string {
 		c.drawPanel(cv, w-panelW, graphTop, panelW, h-graphTop-legendH)
 	}
 	if c.status != "" {
-		cv.text(0, h-1, clip(" "+c.status, w), &c.sty.ok)
+		cv.text(0, h-1, padPlain(clip(" "+c.status, w), w), &c.sty.ok)
 	}
 	if c.modal != nil {
 		c.modal.draw(cv, c.sty, w, h)
@@ -391,7 +391,7 @@ func (c *constellation) drawPanel(cv *canvas, x, y, w, h int) {
 			add(l, &c.sty.panel)
 		}
 		add("", nil)
-		add("[enter] suggest rule (step 5)", &c.sty.help)
+		add("[enter] suggest allow rule", &c.sty.help)
 	default:
 		s := n.skill
 		state := map[nodeKind]string{kindInstalled: "installed", kindManaged: "managed by Claude Code", kindAvailable: "not installed"}[n.kind]
@@ -452,8 +452,16 @@ func (c *constellation) act() {
 	case kindAvailable:
 		plan, err = c.st.PlanInstall(*n.skill)
 	case kindTrust:
-		c.status = "trust unlock suggestions arrive in step 5"
-		return
+		u := n.unlock
+		switch {
+		case u.Granted:
+			c.status = u.Rule + " is already allowed"
+			return
+		case !u.Reached:
+			c.status = fmt.Sprintf("%s: %d of %d successful %s calls so far", u.Name, u.Count, u.Threshold, u.Prefix)
+			return
+		}
+		plan, err = c.st.PlanAllowRule(u.Rule)
 	default:
 		c.status = "managed by Claude Code; nothing to change here"
 		return

@@ -32,13 +32,14 @@ type Model struct {
 	screen screen
 	cons   *constellation
 	sheet  *sheet
+	ledger *ledger
 	help   bool
 }
 
 // New builds the root model. Size arrives with the first WindowSizeMsg.
 func New(st *app.State) Model {
 	sty := newStyles(st.Theme)
-	return Model{st: st, sty: sty, cons: newConstellation(st, sty), sheet: newSheet(st, sty)}
+	return Model{st: st, sty: sty, cons: newConstellation(st, sty), sheet: newSheet(st, sty), ledger: newLedger(st, sty)}
 }
 
 // Run starts the program in the alternate screen.
@@ -62,6 +63,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 			return m, m.sheet.update(msg, m.applier())
+		}
+		if m.screen == screenLedger && m.ledger.modal != nil {
+			if msg.String() == "ctrl+c" {
+				return m, tea.Quit
+			}
+			m.ledger.update(msg, m.applier())
+			return m, nil
 		}
 		if m.screen == screenConstellation && m.cons.modal != nil {
 			if msg.String() == "ctrl+c" {
@@ -91,6 +99,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.cons.update(msg, m.applier())
 		case screenSheet:
 			return m, m.sheet.update(msg, m.applier())
+		case screenLedger:
+			m.ledger.update(msg, m.applier())
 		}
 		return m, nil
 	}
@@ -127,8 +137,8 @@ func (m Model) View() string {
 		header = m.sheet.header(inner)
 		body = m.sheet.view(inner, bodyH)
 	case screenLedger:
-		header = m.plainHeader("LEDGER", inner)
-		body = m.placeholder(inner, bodyH, "XP ledger and trust unlocks arrive in build step 5.")
+		header = m.ledger.header(inner)
+		body = m.ledger.view(inner, bodyH)
 	}
 
 	f := m.sty.frame
@@ -190,6 +200,9 @@ func (m Model) keysLine(inner int) string {
 			keys = fmt.Sprintf(" 1 %s · 2 %s · 3 %s · ? keys · q quit ",
 				screenNames[0], screenNames[1], screenNames[2])
 		}
+		if m.screen == screenLedger {
+			keys = " tab pane · j/k move · enter suggest rule · 1/2 screens · q quit "
+		}
 		if m.screen == screenSheet {
 			keys = " tab field · enter edit · u/p file · ctrl+s save · e $EDITOR · 1/3 screens · q quit "
 		}
@@ -247,6 +260,7 @@ func (m Model) applier() applyFn {
 			*m.st = *fresh
 			m.cons.reset(m.st)
 			m.sheet.reset(m.st)
+			m.ledger.reset(m.st)
 		}
 		return res, nil
 	}

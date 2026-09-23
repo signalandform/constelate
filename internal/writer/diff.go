@@ -37,7 +37,7 @@ func Diff(op Op) []string {
 	const keep = 2
 	var pending []string
 	flush := func() {
-		if len(pending) > keep {
+		if len(pending) > 2*keep+1 {
 			out = append(out, pending[:keep]...)
 			out = append(out, fmt.Sprintf("@@ %d lines @@", len(pending)-2*keep))
 			out = append(out, pending[len(pending)-keep:]...)

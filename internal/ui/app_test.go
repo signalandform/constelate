@@ -186,3 +186,29 @@ func TestSheetStatesFitFrame(t *testing.T) {
 	m = size(m, 132, 40)
 	checkFrame(t, m.View(), 132, 40, "sheet wide")
 }
+
+func TestLedgerFitsFrameAndProposes(t *testing.T) {
+	st := fixtureState(t)
+	st.Opts.DryRun = true
+	// make the first unlock ready so enter opens a plan
+	st.Unlocks[0].Count = st.Unlocks[0].Threshold
+	st.Unlocks[0].Reached = true
+	m := size(New(st), 80, 24)
+	m = key(m, "3")
+	checkFrame(t, m.View(), 80, 24, "ledger")
+	m = key(m, "tab")
+	m = key(m, "enter")
+	if m.ledger.modal == nil {
+		t.Fatalf("no allow plan; status=%q", m.ledger.status)
+	}
+	checkFrame(t, m.View(), 80, 24, "allow modal")
+	m = key(m, "n")
+	m = key(m, "j")
+	m = key(m, "enter") // second unlock is locked -> status line only
+	checkFrame(t, m.View(), 80, 24, "locked status")
+	if m.ledger.modal != nil || m.ledger.status == "" {
+		t.Errorf("locked unlock should not open a modal; status=%q", m.ledger.status)
+	}
+	m = size(m, 132, 40)
+	checkFrame(t, m.View(), 132, 40, "ledger wide")
+}
