@@ -1,0 +1,73 @@
+export const metadata = { title: "Configuration" };
+
+# Configuration
+
+Const.Elate keeps everything it owns under `~/.config/constelate/`. All of it is optional.
+
+| File | Holds |
+|---|---|
+| `config.toml` | Agent name, context budget, XP weights, trust unlocks |
+| `categories.toml` | Your own categories and any skill you re-categorised |
+| `disabled/` | Skill folders you disabled, each with a marker recording its origin |
+| `backups/` | A timestamped copy of every file before a write, with a manifest |
+
+## config.toml
+
+These are the defaults. A missing file or a missing key means the default.
+
+```toml
+agent_name = ""      # how the character sheet addresses the agent
+ctx_budget = 4000    # always-loaded skill text, in estimated tokens
+
+[xp]
+session_completed = 50
+tool_call_ok = 2
+tool_call_err = 0
+prompt_approved = 5   # dormant until Claude Code logs approvals
+prompt_rejected = 0
+level_xp = 1000       # XP per level, linear
+
+[[trust.unlocks]]
+name = "git basics"
+prefix = "git"                # first word of the Bash command
+threshold = 25                # successful calls before it suggests the rule
+rule = "Bash(git status *)"   # the allow rule it proposes
+category = "Coding"
+
+[[trust.unlocks]]
+name = "gh cli"
+prefix = "gh"
+threshold = 25
+rule = "Bash(gh pr *)"
+category = "Coding"
+
+[[trust.unlocks]]
+name = "npm scripts"
+prefix = "npm"
+threshold = 25
+rule = "Bash(npm run *)"
+category = "Ops"
+```
+
+Add a `[[trust.unlocks]]` block for each prefix you want watched. The rule is written exactly as
+given, so keep it as narrow as you would type it yourself.
+
+## categories.toml
+
+```toml
+custom = ["Print"]
+
+[assign]
+"print-preflight" = "Print"
+"receipts" = "Ops"
+```
+
+`custom` adds constellations beyond the built-in five. `assign` maps a skill name to a category
+and beats the keyword heuristic. Const.Elate writes this file when you press <kbd>c</kbd>; you
+can also edit it by hand.
+
+## What it never writes
+
+`SKILL.md` files are read, never edited. User and project `settings.json` are read for the model
+and permissions; only `settings.local.json` receives allow rules. `CLAUDE.md` changes only when
+you save from the character sheet and confirm the diff.

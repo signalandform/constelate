@@ -1,0 +1,52 @@
+export const metadata = { title: "Safety" };
+
+# Safety
+
+Const.Elate edits files that shape how an agent behaves, so every write goes through the same
+narrow path. This page is what that path does, so you can decide whether to trust it.
+
+## Every write is a plan
+
+Nothing writes directly. An action produces a plan: the files it would touch and their new
+contents. The plan is then:
+
+1. **Guarded.** Every path must sit inside `~/.claude`, the project's `.claude`, or
+   `~/.config/constelate`. Anything else is refused before you see it.
+2. **Shown as a diff.** You see exactly what changes in each file.
+3. **Backed up.** Each file is copied to `~/.config/constelate/backups/<timestamp>/` with a
+   manifest listing the originals, before it is touched.
+4. **Confirmed.** <kbd>y</kbd> or <kbd>enter</kbd> applies it. Anything else cancels and
+   nothing has changed.
+
+## Disable moves, never deletes
+
+Disabling a skill moves its folder to `~/.config/constelate/disabled/`. A small marker file
+inside, `.constelate-origin`, records the path it came from, so installing it again puts it back
+where it was. No skill folder is ever deleted by Const.Elate.
+
+## Dry run
+
+```sh
+constelate --dry-run
+```
+
+The full TUI, but every plan is only described. Use it the first time, or any time you want to
+see what an action would do without doing it.
+
+## Trust rules are suggested, not granted
+
+A trust unlock proposes one allow rule once its threshold is reached. The proposal is a plan like
+any other: you see the line that would be added to `settings.local.json` and confirm it. Nothing
+is granted because a counter ticked over.
+
+## What it reads but never writes
+
+Session transcripts under `~/.claude/projects` are read for XP and only ever read. `SKILL.md`
+files are read for names, descriptions and cost, and never edited. The model and permissions in
+user and project `settings.json` are read and never edited.
+
+## Restoring by hand
+
+If something is wrong, `~/.config/constelate/backups/` holds a dated folder for every write with
+a manifest that says which file went where. Copy the original back. Const.Elate is not needed
+to undo anything it did.

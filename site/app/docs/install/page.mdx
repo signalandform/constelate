@@ -1,0 +1,43 @@
+export const metadata = { title: "Install" };
+
+# Install
+
+Const.Elate is a single Go binary with no runtime dependencies. Build it from source.
+
+## Build
+
+```sh
+git clone https://github.com/signalandform/constelate
+cd constelate && go build -o constelate .
+```
+
+You need Go 1.24 or newer. Then put the binary somewhere on your `PATH`:
+
+```sh
+cp constelate ~/.local/bin/
+```
+
+## Run
+
+```sh
+constelate              # the TUI, with the current directory as the project
+constelate --summary    # a read-only text report
+constelate --dry-run    # the TUI, but every write is only described
+```
+
+Run it from inside a project so the project-scope skills and `CLAUDE.md` are included. Running
+it from your home directory makes the personal and project `.claude` folders the same place, so
+the loader drops the project scope there rather than counting everything twice.
+
+## Terminal
+
+It renders cleanly at 80 columns by 24 rows. Wider is nicer: the constellation gets more room and
+the detail panel stops covering nodes. Any terminal that draws box characters and the star
+glyphs works; on [Omarchy](https://omarchy.org) it picks up the active theme's colours, and
+everywhere else it uses your terminal's ANSI palette.
+
+## Uninstall
+
+Delete the binary. Anything it disabled lives under `~/.config/constelate/disabled/` with a
+marker that says where each folder came from; move a folder back to put the skill back. Delete
+`~/.config/constelate` once you no longer want its backups.

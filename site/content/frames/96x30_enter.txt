@@ -1,0 +1,30 @@
+┌─ CODING ─────────────────────────── ◂ WRITING · RESEARCH · OPS · DESIGN · PRINT · UNSORTED ▸ ┐
+│                                                                                              │
+│  ★ go-cli─────────────★ nextjs-app-router                          ┌  go-cli ───────────────┐│
+│                        ╲                                           │ installed              ││
+│     ★ typescript-strict──★ react-testing                           │ scope: personal        ││
+│   ╱                                                                │ ctx: ~25 tok (est.)    ││
+│  ◆ git basics─────────◆ gh cli                                     │ in: Coding (suggested) ││
+│                                                                    │                        ││
+│                                                                    │ Build Go command-line  ││
+│                                                                    │ tools with cobra-free  ││
+│                                                                    │ flag parsing, clean    ││
+│                                                                    │ exits and testable     ││
+│                                                                    │ commands.              ││
+│                                                                    │                        ││
+│                                                                    │ [enter] disable  [c] … ││
+│                                                                    │                        ││
+│                                                                    │                        ││
+│                                                                    │                        ││
+│                                                                    │                        ││
+│                                                                    │                        ││
+│                                                                    │                        ││
+│                                                                    │                        ││
+│                                                                    │                        ││
+│                                                                    │                        ││
+│                                                                    │                        ││
+│                                                                    └────────────────────────┘│
+│ ★ installed   ☆ managed   ○ available   ◆ trust unlock                                       │
+├──────────────────────────────────────────────────────────────────────────────────────────────┤
+│ LVL 1  XP █████████░ 900/1000   CTX █░░░░░░░ ~690/4.0k tok                                   │
+└─ 1 CONSTELLATION · 2 CHARACTER · 3 LEDGER · ? keys · q quit · theme ansi ────────────────────┘

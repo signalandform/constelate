@@ -1,0 +1,30 @@
+┌─ LEDGER level 1 · 900 xp total ──────────────────────────────────────────────────────────────┐
+│ weights: session 50 · tool ok 2 · tool err 0 · prompt ok 5 (dormant: not in logs)            │
+│ SESSIONS  date       project                tools  err done     xp                           │
+│           2026-09-20 home-wren-repos-atlas     51    1  ✓     150                            │
+│           2026-09-19 home-wren-repos-atlas     51    1  ✓     150                            │
+│           2026-09-18 home-wren-repos-atlas     51    1  ✓     150                            │
+│           2026-09-16 home-wren-repos-site      51    1  ✓     150                            │
+│           2026-09-14 home-wren-repos-site      51    1  ✓     150                            │
+│           2026-09-11 home-wren-repos-atlas     51    1  ✓     150                            │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│ TRUST UNLOCKS  after N successful calls, suggest an allow rule; you confirm every time       │
+│ ◆ git basics   ░░░░░░░░░░   0/25   Bash(git status *)       granted                          │
+│ ◆ gh cli       ░░░░░░░░░░   0/25   Bash(gh pr *)            locked                           │
+│ ◆ npm scripts  ░░░░░░░░░░   0/25   Bash(npm run *)          locked                           │
+│                                                                                              │
+│                                                                                              │
+├──────────────────────────────────────────────────────────────────────────────────────────────┤
+│ LVL 1  XP █████████░ 900/1000   CTX █░░░░░░░ ~690/4.0k tok                                   │
+└─ tab pane · j/k move · enter suggest rule · 1/2 screens · q quit ────────────────────────────┘

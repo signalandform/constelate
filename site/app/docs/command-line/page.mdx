@@ -1,0 +1,70 @@
+export const metadata = { title: "Command line" };
+
+# Command line
+
+Without flags, `constelate` opens the TUI with the current directory as the project. These flags
+change that.
+
+| Flag | Does |
+|---|---|
+| `--summary` | Print a read-only report and exit: skills by scope, context cost against budget, character sheet sources, trust progress, XP totals |
+| `--summary --json` | The same report as JSON, for scripts |
+| `--dry-run` | Open the TUI, but describe every write instead of making it |
+| `--render WxH[+key...]` | Draw one frame at that size, press the given keys, print it and exit |
+
+## Render
+
+`--render` needs no TTY, so it works in scripts, CI and screenshots. Keys after the size are
+pressed in order before the frame is captured:
+
+```sh
+constelate --render 80x24                # the constellation, as first drawn
+constelate --render 96x30+tab+enter      # next constellation, detail panel open
+constelate --render 96x30+2              # the character sheet
+constelate --render 96x30+3              # the ledger
+```
+
+Key names are the ones the TUI uses: `tab`, `shift+tab`, `enter`, `esc`, `up`, `down`, `left`,
+`right`, and single characters. Every frame on this site was made this way.
+
+## Summary
+
+```
+CONST.ELATE  read-only summary
+project: /home/wren/repos/atlas
+
+SKILLS  22 found
+  personal   18  writable  ~603 tok
+  project     1  writable  ~34 tok
+  synced      3  read-only  ~53 tok
+
+CONTEXT (estimate, chars/4)
+  always-loaded skill text  ~690 tok of 4000 budget
+  of which you can change   ~637 tok (personal + project)
+  CLAUDE.md (user)  13 lines  ~122 tok  "Working rules for this machine"
+
+CHARACTER SHEET
+  model  claude-fable-5-1  (from user)
+  user           ok      /home/wren/.claude/settings.json
+  user.local     absent  /home/wren/.claude/settings.local.json
+  project        absent  /home/wren/repos/atlas/.claude/settings.json
+  project.local  absent  /home/wren/repos/atlas/.claude/settings.local.json
+
+TRUST  1 allow  0 deny  0 ask
+  git basics   0/25  granted
+  gh cli       0/25
+  npm scripts  0/25
+
+XP  level 1  900/1000  (total 900)
+  sessions 6  completed 6  tool ok 300  tool err 6  rejected 0
+  log versions 2.1.265  bad lines 6
+  note: approvals are not in the logs; prompt XP is 0 until they are
+```
+
+The summary is the quickest way to see whether you are over budget and what you could trim. It
+touches nothing.
+
+## Exit codes
+
+`0` on success. `1` with a message on stderr when a flag is malformed or a required directory
+cannot be read. The TUI leaves the terminal as it found it on <kbd>q</kbd> or <kbd>ctrl+c</kbd>.

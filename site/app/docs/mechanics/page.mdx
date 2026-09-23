@@ -1,0 +1,54 @@
+export const metadata = { title: "Mechanics" };
+
+# Mechanics
+
+The RPG framing is a way of making three real quantities visible: what your skills cost, what
+your sessions produce, and which commands you trust.
+
+## Perk points are context cost
+
+Every skill's name and description are loaded into every Claude Code session so the model knows
+when to use it. That is the skill's always-loaded cost. Const.Elate estimates it from the
+frontmatter at four characters per token and labels the number as an estimate.
+
+The CTX bar at the bottom compares the total against a budget you set (4,000 tokens by default).
+Over budget warns; it never blocks. The summary also splits the total into the part you can
+change (personal and project skills) and the part you cannot (plugin and synced skills).
+
+## XP comes from outcomes
+
+XP is read from the session transcripts Claude Code writes under `~/.claude/projects`. It counts
+outcomes, never tokens:
+
+| Event | Default XP |
+|---|---|
+| A session completed | 50 |
+| A tool call that succeeded | 2 |
+| A tool call that failed | 0 |
+| A prompt you approved | 5, dormant |
+
+Approvals are not in the logs today, so the approval weight does nothing until they are. Levels
+are linear: 1,000 XP per level by default. All weights live in [config](/docs/configuration).
+
+## Trust unlocks
+
+A trust unlock watches a command prefix such as `git` or `npm`. After it has succeeded enough
+times (25 by default), the ledger suggests a matching allow rule such as `Bash(git status *)`.
+You confirm every suggestion, and the rule is written to `settings.local.json` through the same
+diff-and-backup path as any other write. Three unlocks ship by default; add your own in config.
+
+## Categories
+
+Skills are sorted into Coding, Writing, Research, Ops and Design by a keyword heuristic over the
+name and description. Anything it cannot place lands in Unsorted. You can override any
+assignment with <kbd>c</kbd> and add your own categories.
+
+Assignments are a sidecar file, `~/.config/constelate/categories.toml`. `SKILL.md` is never
+edited to record a category, so a skill you share keeps working for people who do not use
+Const.Elate.
+
+## Theme
+
+On Omarchy, colours come from the active theme's `colors.toml` under
+`~/.local/state/omarchy/current/theme/`. Anywhere else, Const.Elate uses the terminal's own
+ANSI palette, so it follows whatever theme the terminal already has.

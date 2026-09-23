@@ -1,0 +1,30 @@
+┌─ OPS ─────────────────────────── ◂ CODING · WRITING · RESEARCH · DESIGN · PRINT · UNSORTED ▸ ┐
+│                                                                                              │
+│  ★ cron-scheduler──────★ supabase-migrations─★ vercel-deploy───────◆ npm scripts             │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│                                                                                              │
+│ ★ installed   ☆ managed   ○ available   ◆ trust unlock                                       │
+├──────────────────────────────────────────────────────────────────────────────────────────────┤
+│ LVL 1  XP █████████░ 900/1000   CTX █░░░░░░░ ~690/4.0k tok                                   │
+└─ 1 CONSTELLATION · 2 CHARACTER · 3 LEDGER · ? keys · q quit · theme ansi ────────────────────┘

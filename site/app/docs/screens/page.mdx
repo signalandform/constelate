@@ -1,0 +1,74 @@
+import { Frame } from "@/components/Frame";
+
+export const metadata = { title: "Screens and keys" };
+
+# Screens and keys
+
+Three screens, switched with <kbd>1</kbd>, <kbd>2</kbd> and <kbd>3</kbd>. On every screen
+<kbd>?</kbd> shows the keys and <kbd>q</kbd> quits. <kbd>esc</kbd> closes whatever is open.
+
+## Constellation
+
+Press <kbd>1</kbd>.
+
+<Frame name="96x30_enter" label="The Coding constellation with the detail panel open for go-cli" />
+
+Skills are drawn as nodes, grouped by category. Filled stars are installed personal or project
+skills, which you can change. Hollow stars are managed skills: plugin skills and skills synced
+from claude.ai, shown read-only. Circles are available but not installed. Diamonds are trust
+unlocks in progress.
+
+| Key | Does |
+|---|---|
+| <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd> or arrows | Move between nodes |
+| <kbd>tab</kbd> / <kbd>shift+tab</kbd> | Next or previous constellation |
+| <kbd>enter</kbd> | Open the detail panel for the node under the cursor |
+| <kbd>enter</kbd> again | Install or disable that skill, after a confirmation |
+| <kbd>c</kbd> | Re-categorise the skill (stored in a sidecar file, never in SKILL.md) |
+| <kbd>esc</kbd> | Close the panel |
+
+The detail panel shows scope (personal or project), the estimated always-loaded context cost, the
+category and why it was suggested, and the description from the skill's frontmatter.
+
+## Character sheet
+
+Press <kbd>2</kbd>.
+
+<Frame name="96x30_2" label="The character sheet with the CLAUDE.md editor" />
+
+The agent's name comes from your Const.Elate config; Claude Code has no such setting. The model
+is read from `settings.json`. The lower half is a CLAUDE.md editor for the user file and the
+project file.
+
+| Key | Does |
+|---|---|
+| <kbd>tab</kbd> | Move between fields |
+| <kbd>enter</kbd> | Start editing the focused field |
+| <kbd>u</kbd> / <kbd>p</kbd> | Switch the editor to the user or project CLAUDE.md |
+| <kbd>ctrl+s</kbd> | Propose the save: you see the diff and confirm |
+| <kbd>e</kbd> | Open the file in `$EDITOR` instead |
+
+## Ledger
+
+Press <kbd>3</kbd>.
+
+<Frame name="96x30_3" label="The ledger with sessions and trust unlocks" />
+
+The top pane lists sessions with the tool calls that succeeded and failed, whether the session
+completed, and the XP it earned. The bottom pane is trust unlocks: for each command prefix, how
+many successful uses it has seen against the threshold, and the allow rule it would suggest.
+
+| Key | Does |
+|---|---|
+| <kbd>tab</kbd> | Switch panes |
+| <kbd>j</kbd> / <kbd>k</kbd> | Move within a pane |
+| <kbd>enter</kbd> | On an unlock that has reached its threshold, propose the allow rule |
+
+Nothing is granted automatically. The proposal shows the exact line that would be added to
+`settings.local.json` and waits for <kbd>y</kbd>.
+
+## Confirmations
+
+Every proposed write shows a diff and asks. <kbd>y</kbd> or <kbd>enter</kbd> confirms;
+<kbd>n</kbd>, <kbd>esc</kbd> or <kbd>q</kbd> cancels. See [Safety](/docs/safety) for what
+happens on confirm.
