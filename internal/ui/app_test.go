@@ -20,7 +20,7 @@ import (
 // fixtureState builds a State from testdata without touching the real home.
 func fixtureState(t *testing.T) *app.State {
 	t.Helper()
-	root := filepath.Join("..", "..", "testdata")
+	root, _ := filepath.Abs(filepath.Join("..", "..", "testdata"))
 	var skills []claude.Skill
 	for _, d := range []string{"3d-web-experience", "accessibility", "data-visualization", "find-skills", "no-frontmatter"} {
 		skills = append(skills, claude.ParseSkillFile(filepath.Join(root, "skills", d, "SKILL.md"), claude.ScopePersonal))
@@ -39,6 +39,7 @@ func fixtureState(t *testing.T) *app.State {
 	cfg := config.Default()
 	st := &app.State{
 		Opts:     app.Options{Project: "/tmp/proj"},
+		Roots:    claude.Roots{Home: root, Disabled: filepath.Join(root, "disabled")},
 		Config:   cfg,
 		Cats:     categories.Store{File: categories.File{Assign: map[string]string{}}},
 		Theme:    theme.ANSI(),
