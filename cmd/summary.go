@@ -7,11 +7,12 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/signalandform/constelate/internal/app"
 	"github.com/signalandform/constelate/internal/claude"
 )
 
 // PrintSummary is build step 1: prove the parsers against a real install.
-func PrintSummary(w io.Writer, st *State) error {
+func PrintSummary(w io.Writer, st *app.State) error {
 	if st.Opts.JSON {
 		enc := json.NewEncoder(w)
 		enc.SetIndent("", "  ")
@@ -141,7 +142,7 @@ func PrintSummary(w io.Writer, st *State) error {
 	return nil
 }
 
-func summaryJSON(st *State) map[string]any {
+func summaryJSON(st *app.State) map[string]any {
 	return map[string]any{
 		"project":  st.Opts.Project,
 		"skills":   st.Skills,

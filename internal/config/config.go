@@ -42,6 +42,7 @@ type Unlock struct {
 	Prefix    string `toml:"prefix"`    // Bash command first word, e.g. "git"
 	Threshold int    `toml:"threshold"` // successful calls needed
 	Rule      string `toml:"rule"`      // permissions.allow pattern to suggest
+	Category  string `toml:"category"`  // constellation the node appears in
 }
 
 func Default() Config {
@@ -56,9 +57,9 @@ func Default() Config {
 			LevelXP:          1000,
 		},
 		Trust: Trust{Unlocks: []Unlock{
-			{Name: "git basics", Prefix: "git", Threshold: 25, Rule: "Bash(git status *)"},
-			{Name: "gh cli", Prefix: "gh", Threshold: 25, Rule: "Bash(gh pr *)"},
-			{Name: "npm scripts", Prefix: "npm", Threshold: 25, Rule: "Bash(npm run *)"},
+			{Name: "git basics", Prefix: "git", Threshold: 25, Rule: "Bash(git status *)", Category: "Coding"},
+			{Name: "gh cli", Prefix: "gh", Threshold: 25, Rule: "Bash(gh pr *)", Category: "Coding"},
+			{Name: "npm scripts", Prefix: "npm", Threshold: 25, Rule: "Bash(npm run *)", Category: "Ops"},
 		}},
 	}
 }
