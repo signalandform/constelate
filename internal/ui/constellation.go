@@ -9,6 +9,7 @@ import (
 
 	"github.com/signalandform/constelate/internal/app"
 	"github.com/signalandform/constelate/internal/claude"
+	"github.com/signalandform/constelate/internal/writer"
 	"github.com/signalandform/constelate/internal/xp"
 )
 
@@ -42,6 +43,8 @@ type constellation struct {
 	tab    int
 	sel    map[string]int // selected node index per category
 	detail bool
+	modal  *confirm
+	status string // one-line message after an action
 	// last layout, for navigation and drawing
 	cols, pitch, rowH int
 }
@@ -121,7 +124,17 @@ func (c *constellation) selected() *node {
 	return &list[i]
 }
 
-func (c *constellation) update(msg tea.KeyMsg) {
+// applyFn runs a plan and swaps in the reloaded state on success.
+type applyFn func(writer.Plan) (writer.Result, error)
+
+func (c *constellation) update(msg tea.KeyMsg, apply applyFn) {
+	c.status = ""
+	if c.modal != nil {
+		if c.modal.update(msg, apply) {
+			c.modal = nil
+		}
+		return
+	}
 	switch msg.String() {
 	case "tab":
 		if len(c.cats) > 0 {
@@ -134,7 +147,16 @@ func (c *constellation) update(msg tea.KeyMsg) {
 		}
 		return
 	case "enter":
-		c.detail = !c.detail
+		if !c.detail {
+			c.detail = true
+			return
+		}
+		c.act()
+		return
+	case "c":
+		if c.detail {
+			c.cycleCategory()
+		}
 		return
 	case "esc":
 		c.detail = false
@@ -268,8 +290,14 @@ func (c *constellation) view(w, h int) string {
 	legend := " ★ installed   ☆ managed   ○ available   ◆ trust unlock"
 	cv.text(0, h-1, clip(legend, graphW), &c.sty.legend)
 
-	if c.detail {
+	if c.detail && c.modal == nil {
 		c.drawPanel(cv, w-panelW, graphTop, panelW, h-graphTop-legendH)
+	}
+	if c.status != "" {
+		cv.text(0, h-1, clip(" "+c.status, w), &c.sty.ok)
+	}
+	if c.modal != nil {
+		c.modal.draw(cv, c.sty, w, h)
 	}
 	return cv.render()
 }
@@ -363,7 +391,7 @@ func (c *constellation) drawPanel(cv *canvas, x, y, w, h int) {
 			add(l, &c.sty.panel)
 		}
 		add("", nil)
-		add("[enter] step 5", &c.sty.help)
+		add("[enter] suggest rule (step 5)", &c.sty.help)
 	default:
 		s := n.skill
 		state := map[nodeKind]string{kindInstalled: "installed", kindManaged: "managed by Claude Code", kindAvailable: "not installed"}[n.kind]
@@ -395,11 +423,11 @@ func (c *constellation) drawPanel(cv *canvas, x, y, w, h int) {
 		add("", nil)
 		switch n.kind {
 		case kindInstalled:
-			add("[enter] disable (step 3)", &c.sty.help)
+			add("[enter] disable  [c] category", &c.sty.help)
 		case kindAvailable:
-			add("[enter] install (step 3)", &c.sty.help)
+			add("[enter] install  [c] category", &c.sty.help)
 		default:
-			add("read-only", &c.sty.help)
+			add("read-only  [c] category", &c.sty.help)
 		}
 	}
 	for i, l := range lines {
@@ -407,5 +435,69 @@ func (c *constellation) drawPanel(cv *canvas, x, y, w, h int) {
 			break
 		}
 		cv.text(x+2, y+1+i, clip(l, inner), lineStyle[i])
+	}
+}
+
+// act opens the confirmation modal for the selected node's primary action.
+func (c *constellation) act() {
+	n := c.selected()
+	if n == nil {
+		return
+	}
+	var plan writer.Plan
+	var err error
+	switch n.kind {
+	case kindInstalled:
+		plan, err = c.st.PlanDisable(*n.skill)
+	case kindAvailable:
+		plan, err = c.st.PlanInstall(*n.skill)
+	case kindTrust:
+		c.status = "trust unlock suggestions arrive in step 5"
+		return
+	default:
+		c.status = "managed by Claude Code; nothing to change here"
+		return
+	}
+	if err == nil {
+		err = c.st.Guard().Check(plan)
+	}
+	if err != nil {
+		c.status = err.Error()
+		return
+	}
+	c.modal = newConfirm(plan, c.st.Opts.DryRun)
+}
+
+// cycleCategory proposes moving the selected skill to the next category.
+func (c *constellation) cycleCategory() {
+	n := c.selected()
+	if n == nil || n.skill == nil {
+		return
+	}
+	all := c.st.Cats.All()
+	next := all[0]
+	for i, cat := range all {
+		if cat == n.category {
+			next = all[(i+1)%len(all)]
+			break
+		}
+	}
+	plan, err := c.st.PlanCategory(*n.skill, next)
+	if err != nil {
+		c.status = err.Error()
+		return
+	}
+	c.modal = newConfirm(plan, c.st.Opts.DryRun)
+}
+
+// reset swaps in a freshly loaded state, keeping the tab and selection.
+func (c *constellation) reset(st *app.State) {
+	tab, sel := c.tab, c.sel
+	c.st = st
+	c.build()
+	c.tab = min(tab, max(0, len(c.cats)-1))
+	c.sel = sel
+	if s := c.selected(); s == nil {
+		c.sel[c.current()] = 0
 	}
 }

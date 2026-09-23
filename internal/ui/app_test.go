@@ -128,3 +128,27 @@ func TestNavigationMovesSelection(t *testing.T) {
 		t.Errorf("h did not return: %s vs %s", got, before)
 	}
 }
+
+func TestModalFitsFrame(t *testing.T) {
+	st := fixtureState(t)
+	st.Opts.DryRun = true
+	m := size(New(st), 80, 24)
+	_ = m.View()
+	for i := 0; i < len(m.cons.cats) && m.cons.selected().kind != kindInstalled; i++ {
+		m = key(m, "tab") // find a tab whose first node is a skill we own
+		_ = m.View()
+	}
+	m = key(m, "enter") // detail
+	m = key(m, "enter") // plan modal (dry run)
+	if m.cons.modal == nil {
+		t.Fatalf("no modal; status=%q", m.cons.status)
+	}
+	checkFrame(t, m.View(), 80, 24, "modal")
+	m = key(m, "j")
+	checkFrame(t, m.View(), 80, 24, "modal scrolled")
+	m = key(m, "n")
+	if m.cons.modal != nil {
+		t.Error("n did not close the modal")
+	}
+	checkFrame(t, m.View(), 80, 24, "after cancel")
+}

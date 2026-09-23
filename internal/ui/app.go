@@ -11,6 +11,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/signalandform/constelate/internal/app"
+	"github.com/signalandform/constelate/internal/writer"
 )
 
 type screen int
@@ -53,6 +54,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.w, m.h = msg.Width, msg.Height
 		return m, nil
 	case tea.KeyMsg:
+		if m.screen == screenConstellation && m.cons.modal != nil {
+			if msg.String() == "ctrl+c" {
+				return m, tea.Quit
+			}
+			m.cons.update(msg, m.applier())
+			return m, nil
+		}
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
@@ -70,7 +78,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		if m.screen == screenConstellation {
-			m.cons.update(msg)
+			m.cons.update(msg, m.applier())
 		}
 	}
 	return m, nil
@@ -205,4 +213,21 @@ func RenderOnce(st *app.State, w, h int, keys []string) string {
 		m = mm.(Model)
 	}
 	return m.View()
+}
+
+// applier runs a plan through State.Apply and, on success, reloads every
+// screen from the fresh state. The pointer swap is what makes the reload
+// visible: Model is a value, but m.st and m.cons are shared pointers.
+func (m Model) applier() applyFn {
+	return func(p writer.Plan) (writer.Result, error) {
+		res, fresh, err := m.st.Apply(p)
+		if err != nil {
+			return res, err
+		}
+		if fresh != m.st {
+			*m.st = *fresh
+			m.cons.reset(m.st)
+		}
+		return res, nil
+	}
 }
