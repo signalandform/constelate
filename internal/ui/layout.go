@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 )
 
 // Minimum terminal size the layout is designed for.
@@ -20,10 +21,13 @@ type canvas struct {
 	maxX  int // puts at x >= maxX are dropped while > 0; fences the graph off the panel
 	cells [][]rune
 	style [][]*lipgloss.Style
+	// rawRows holds pre-styled lines (a textarea view) rendered verbatim.
+	// Drawing anything onto such a row first flattens it into cells.
+	rawRows map[int]string
 }
 
 func newCanvas(w, h int) *canvas {
-	c := &canvas{w: w, h: h, maxX: w}
+	c := &canvas{w: w, h: h, maxX: w, rawRows: map[int]string{}}
 	c.cells = make([][]rune, h)
 	c.style = make([][]*lipgloss.Style, h)
 	for y := range c.cells {
@@ -40,6 +44,14 @@ func (c *canvas) put(x, y int, r rune, st *lipgloss.Style) {
 	if x < 0 || y < 0 || x >= c.w || y >= c.h || x >= c.maxX {
 		return
 	}
+	if raw, ok := c.rawRows[y]; ok {
+		delete(c.rawRows, y)
+		for i, rr := range []rune(ansi.Strip(raw)) {
+			if i < c.w {
+				c.cells[y][i] = rr
+			}
+		}
+	}
 	c.cells[y][x] = r
 	c.style[y][x] = st
 }
@@ -50,9 +62,25 @@ func (c *canvas) text(x, y int, s string, st *lipgloss.Style) {
 	}
 }
 
+// raw stores a pre-styled line for row y; it is padded or truncated to width.
+func (c *canvas) raw(y int, line string) {
+	if y < 0 || y >= c.h {
+		return
+	}
+	c.rawRows[y] = line
+}
+
 func (c *canvas) render() string {
 	var sb strings.Builder
 	for y := 0; y < c.h; y++ {
+		if raw, ok := c.rawRows[y]; ok {
+			line := ansi.Truncate(raw, c.w, "")
+			sb.WriteString(line + strings.Repeat(" ", max(0, c.w-lipgloss.Width(line))))
+			if y < c.h-1 {
+				sb.WriteByte('\n')
+			}
+			continue
+		}
 		x := 0
 		for x < c.w {
 			st := c.style[y][x]

@@ -14,6 +14,10 @@ import (
 type Config struct {
 	Path string `toml:"-"`
 
+	// AgentName is how the character sheet addresses the agent. Claude Code
+	// has no such setting; this is Constelate's own.
+	AgentName string `toml:"agent_name"`
+
 	// Context budget in estimated tokens for always-loaded skill text.
 	CtxBudget int `toml:"ctx_budget"`
 

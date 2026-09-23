@@ -31,13 +31,14 @@ type Model struct {
 	w, h   int
 	screen screen
 	cons   *constellation
+	sheet  *sheet
 	help   bool
 }
 
 // New builds the root model. Size arrives with the first WindowSizeMsg.
 func New(st *app.State) Model {
 	sty := newStyles(st.Theme)
-	return Model{st: st, sty: sty, cons: newConstellation(st, sty)}
+	return Model{st: st, sty: sty, cons: newConstellation(st, sty), sheet: newSheet(st, sty)}
 }
 
 // Run starts the program in the alternate screen.
@@ -53,7 +54,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.w, m.h = msg.Width, msg.Height
 		return m, nil
+	case editorDoneMsg:
+		return m, m.sheet.update(msg, m.applier())
 	case tea.KeyMsg:
+		if m.screen == screenSheet && m.sheet.capturing() {
+			if msg.String() == "ctrl+c" {
+				return m, tea.Quit
+			}
+			return m, m.sheet.update(msg, m.applier())
+		}
 		if m.screen == screenConstellation && m.cons.modal != nil {
 			if msg.String() == "ctrl+c" {
 				return m, tea.Quit
@@ -77,9 +86,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.screen = screenLedger
 			return m, nil
 		}
-		if m.screen == screenConstellation {
+		switch m.screen {
+		case screenConstellation:
 			m.cons.update(msg, m.applier())
+		case screenSheet:
+			return m, m.sheet.update(msg, m.applier())
 		}
+		return m, nil
+	}
+	if m.screen == screenSheet {
+		return m, m.sheet.update(msg, m.applier()) // cursor blink etc.
 	}
 	return m, nil
 }
@@ -108,8 +124,8 @@ func (m Model) View() string {
 		header = m.cons.header(inner)
 		body = m.cons.view(inner, bodyH)
 	case screenSheet:
-		header = m.plainHeader("CHARACTER SHEET", inner)
-		body = m.placeholder(inner, bodyH, "Character sheet arrives in build step 4.")
+		header = m.sheet.header(inner)
+		body = m.sheet.view(inner, bodyH)
 	case screenLedger:
 		header = m.plainHeader("LEDGER", inner)
 		body = m.placeholder(inner, bodyH, "XP ledger and trust unlocks arrive in build step 5.")
@@ -174,6 +190,9 @@ func (m Model) keysLine(inner int) string {
 			keys = fmt.Sprintf(" 1 %s · 2 %s · 3 %s · ? keys · q quit ",
 				screenNames[0], screenNames[1], screenNames[2])
 		}
+		if m.screen == screenSheet {
+			keys = " tab field · enter edit · u/p file · ctrl+s save · e $EDITOR · 1/3 screens · q quit "
+		}
 	}
 	w := lipWidth(keys)
 	if w > inner-1 {
@@ -227,6 +246,7 @@ func (m Model) applier() applyFn {
 		if fresh != m.st {
 			*m.st = *fresh
 			m.cons.reset(m.st)
+			m.sheet.reset(m.st)
 		}
 		return res, nil
 	}

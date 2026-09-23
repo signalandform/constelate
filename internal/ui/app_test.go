@@ -153,3 +153,36 @@ func TestModalFitsFrame(t *testing.T) {
 	}
 	checkFrame(t, m.View(), 80, 24, "after cancel")
 }
+
+func TestSheetStatesFitFrame(t *testing.T) {
+	st := fixtureState(t)
+	st.Opts.DryRun = true
+	m := size(New(st), 80, 24)
+	m = key(m, "2")
+	checkFrame(t, m.View(), 80, 24, "sheet")
+	m = key(m, "enter") // name input
+	checkFrame(t, m.View(), 80, 24, "name editing")
+	if !m.sheet.capturing() {
+		t.Error("name input not capturing")
+	}
+	m = key(m, "q") // must type, not quit
+	if m.sheet.nameIn.Value() != "q" {
+		t.Errorf("q was not typed into the name: %q", m.sheet.nameIn.Value())
+	}
+	m = key(m, "esc")
+	m = key(m, "tab")
+	m = key(m, "enter") // model picker
+	checkFrame(t, m.View(), 80, 24, "picker")
+	m = key(m, "j")
+	m = key(m, "enter") // plan modal, dry run
+	if m.sheet.modal == nil {
+		t.Fatalf("no model plan modal; status=%q", m.sheet.status)
+	}
+	checkFrame(t, m.View(), 80, 24, "model modal")
+	m = key(m, "n")
+	m = key(m, "tab")
+	m = key(m, "enter") // textarea (no CLAUDE.md in fixture -> status only)
+	checkFrame(t, m.View(), 80, 24, "instructions")
+	m = size(m, 132, 40)
+	checkFrame(t, m.View(), 132, 40, "sheet wide")
+}
